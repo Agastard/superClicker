@@ -193,26 +193,23 @@
   }
 
   class Jugador {
-    //clicks = 0;
     subidaNivel = 1;
     subidaNivelInicial = 1;
     poderInicial = 1;
     vidasInicial = 1;
     poder;
     vidas;
-    constructor() {
-      this.poder = 1;
-      this.vidas = 1;
-      this.subidaNivel = 1;
+    constructor(subidaNivelInicial = 1) {
+      this.init(subidaNivelInicial);
     }
     init(subidaNivelInicial) {
       this.poder = this.poderInicial;
       this.vidas = this.vidasInicial;
       this.subidaNivel = subidaNivelInicial;
     }
-    subirDeNivel(newSubidaNivel) {
-      this.poder = this.poder + 1;
-      this.subidaNivel = newSubidaNivel;
+    subirDeNivel(incremento) {
+      this.poder += 1;
+      this.subidaNivel += incremento;
     }
     getPoder() {
       return this.poder;
@@ -243,49 +240,20 @@
     instanciaJugador;
     instanciaEnemigo;
     arrayColoresEnemigos = ['rgb(0, 229, 255)', 'rgb(55, 50, 200)', 'rgb(200, 50, 200)', 'rgb(200, 50, 100)', 'rgb(238, 160, 14)'];
-    nivelActual;
     constructor(clicksBase = 10, nivelesClicks = 1) {// TODO EN el futuro podría ser invocada desde fuera
       this.instanciaJugador = new Jugador();
       this.instanciaEnemigo = new Enemigo();
-      //this.clicks = 0;
       this.clicksNecesariosParaGanarInicial = clicksBase * nivelesClicks;
       this.clicksNecesariosParaGanar = this.clicksNecesariosParaGanarInicial;
       this.nivelesClicks = nivelesClicks;
-      // (this.clicksNecesariosParaGanar * 0.25) es loq ue queramos que aumente de base
       this.clicksNecesariosParaSubirNivelBase = (clicksBase * 0.25);
-      //this.clicksNecesariosASubirNivelInicial = clicksNecesariosSubirNivelInc;
       this.init();
     }
 
     init() {
-      this.setClicks(0);
-      this.setNivelActual(1);
-      this.setIndiceColor(0);
-      this.clicksNecesariosParaGanar = this.clicksNecesariosParaGanarInicial;
-      this.instanciaJugador.init(this.clicksNecesariosParaSubirNivelBase);
-      //this.setColorEnemigoSegunNivel();
-      this.setColorByindice();
-      document.getElementById("contador").innerText = this.clicks;
-      document.getElementById("contadorExperiencia").innerText = this.instanciaJugador.getSubidaNivel();
-
-      //this.clicksNecesariosASubirNivel = this.clicksNecesariosASubirNivelInicial;
-
-      document.getElementById("vidas").innerText = this.instanciaJugador.getVidas();
-      document.getElementById("vidas").classList.add("hide-me");
-      document.getElementById("mensajes").classList.add("hide-me");
-      document.getElementById("enemigo").classList.add("nolabel");
-      document.getElementById("enemigo").classList.add(this.instanciaEnemigo.classEnemigo);
-
-
-      //remove("hide-me")
+      this.resetEstado();
+      this.renderUI();
       console.log("Juego iniciado");
-      return;
-    }
-    getNivelActual() {
-      return this.nivelActual;
-    }
-    setNivelActual(newValue) {
-      return this.nivelActual = newValue;
     }
     getIndiceColor() {
       return this.indiceColor;
@@ -299,30 +267,22 @@
     setClicks(newValue) {
       return this.clicks = newValue;
     }
-    getClicksNecesariosASubirNivel() {
-      return this.clicksNecesariosASubirNivel;
-    }
-    setClicksNecesariosASubirNivel(nuevoValor) {
-      this.clicksNecesariosASubirNivel = nuevoValor;
-    }
     subirDeNivel() {
-      const newSubidadeNivel = this.clicksNecesariosParaSubirNivelBase * this.instanciaJugador.getPoder();
+      const nextPoder = this.instanciaJugador.getPoder() + 1;
+      const newSubidadeNivel = this.clicksNecesariosParaSubirNivelBase * nextPoder;
+      //const newSubidadeNivel = this.clicksNecesariosParaSubirNivelBase * this.instanciaJugador.getPoder();
       this.instanciaJugador.subirDeNivel(newSubidadeNivel);
       document.getElementById("contadorExperiencia").innerText = this.instanciaJugador.getSubidaNivel();
-      this.mostrarMensaje("¡Nivel Up! Poder: " + partida.instanciaJugador.getPoder(), 'green');
+      this.mostrarMensaje("¡Nivel Up! Poder: " + this.instanciaJugador.getPoder(), 'green');
       // TODO a partir de X nivel, subir también vidar...no olvida mostrar vidas entonces. 
-
-      //this.setColorEnemigoSegunNivel();
       this.setColorByindice()
-
-
     }
     mostrarMensaje(mensajeIncoming = "Hola", colorTexto = "red") {
       document.getElementById("mensajes").classList.remove("hide-me");
       document.getElementById("enemigo").classList.remove("nolabel");
       document.getElementById("texto").classList.add("activo");
       document.getElementById("texto").innerHTML = mensajeIncoming;
-      // Guarrada, esto se´ria mejor con clases
+      // Guarrada, esto sería mejor con clases
       document.getElementById("texto").style.color = colorTexto;
       let parpadeo = setInterval(() => {
         document.getElementById("texto").classList.toggle("activo");
@@ -340,7 +300,6 @@
     contarClick() {
       this.clicks = this.clicks + this.instanciaJugador.getPoder();
       document.getElementById("contador").innerText = this.clicks;
-      //document.getElementById("contadorExperiencia").innerText =  this.clicksNecesariosASubirNivel;
       document.getElementById("enemigo").classList.toggle("danio");
       setTimeout(() => {//Por si el jugador no clicka, quitamos nosotros la clase
         document.getElementById("enemigo").classList.remove("danio");
@@ -348,15 +307,13 @@
 
       // Comprobamos si sube de nivel y/o gana
       if (this.getClicks() >= this.clicksNecesariosParaGanar) {
-        this.init();
-        // aEl init está mal, hay que refactorizar para que vuelva a empazae con loos valores el construct
+        this.mostrarMensaje("¡Has ganado! Reiniciando..."); 
         setTimeout(() => {
-          this.mostrarMensaje("¡Has ganado! Reiniciando..."); 
+          this.init();
         }, 1000);
         return;
       }
       if (this.getClicks() >= this.instanciaJugador.getSubidaNivel()) {
-        //console.log('Sube de nivel', this.clicksNecesariosASubirNivel, this.instanciaJugador.getPoder())
         this.subirDeNivel();
       }
 
@@ -370,31 +327,47 @@
       }
       this.setIndiceColor(newIndice);
     }
-    // Esto tiene fin, podríamos reiniciar los colores 
-    // Creando una vaariable 'currentColor' o mierdas así.
-    setColorEnemigoSegunNivel() {
-      let nivelActual = this.instanciaJugador.getPoder();
-      let colorASetear = 'rgb(0, 229, 255)'; // por defecto
-      if (nivelActual >= 2) {
-        colorASetear = this.arrayColoresEnemigos[4];
-      } else if (nivelActual >= 5) {
-        colorASetear = this.arrayColoresEnemigos[3];
-      } else if (nivelActual >= 7) {
-        colorASetear = this.arrayColoresEnemigos[2];
-      } else if (nivelActual >= 5) {
-        colorASetear = this.arrayColoresEnemigos[1];
-      }
-      this.cambiarColorEnemigo(colorASetear);
-    }
     // Esto debería estar en un helkper o algo..
     cambiarColorEnemigo(nuevoColor) {
       document.getElementById("enemigo").style.setProperty('--bordercoloraafter', nuevoColor)
     }
+    resetEstado() {
+      this.clicks = 0;
+      this.indiceColor = 0;
 
-    
+      // Reiniciar jugador y enemigo COMPLETOS
+      this.instanciaJugador = new Jugador();
+      this.instanciaEnemigo = new Enemigo();
+
+      // Valores derivados
+      this.clicksNecesariosParaGanar = this.clicksNecesariosParaGanarInicial;
+
+      // Inicializar subida de nivel correctamente
+      this.instanciaJugador.init(this.clicksNecesariosParaSubirNivelBase);
+    }
+    renderUI() {
+      document.getElementById("contador").innerText = this.clicks;
+      document.getElementById("contadorExperiencia").innerText =
+        this.instanciaJugador.getSubidaNivel();
+
+      document.getElementById("vidas").innerText =
+        this.instanciaJugador.getVidas();
+
+      document.getElementById("vidas").classList.add("hide-me");
+      document.getElementById("mensajes").classList.add("hide-me");
+
+      const enemigo = document.getElementById("enemigo");
+      enemigo.classList.add("nolabel");
+      //enemigo.className = ""; // limpia clases anteriores
+      enemigo.classList.remove("diamante");
+      enemigo.classList.add(this.instanciaEnemigo.classEnemigo);
+
+      this.setColorByindice();
+    }
+
   }
 
-  const partida = new Juego(10, 1);
+  const partida = new Juego(20,1);
 
   document.getElementById("enemigo").addEventListener('click', () => {
     partida.contarClick();
