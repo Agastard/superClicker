@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperDiegoClicker</title>
+  <style>
+    body {
+      display: grid;
+      place-items: center;
+      height: 50vh;
+      background: rgb(206, 204, 204);
+      padding-top: 5px;
+    }
+
+    .hide-me {
+      display: none;
+    }
+
+    #pantalla {
+      position: relative;
+      width: 20vh;
+      height: 22vh;
+      border: 2px solid black;
+      background-color: lightblue;
+    }
+
+    #contador {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      font-family: arial, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #contadorExperiencia {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-family: arial, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #vidas {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-family: arial, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    div#zonacliker {
+      user-select: none;
+    }
+
+    .figura {
+      display: inline-block;
+      width: 200px;
+      min-height: 180px;
+      padding: 20px;
+      margin: 10px;
+      background-color: rgba(255, 239, 160, 0.6);
+      border-radius: 3px;
+      border: 2px solid rgba(232, 205, 134, 0.6);
+      vertical-align: middle;
+
+      margin: 40px 10px 10px 10px;
+    }
+
+    .figura:hover {
+      background-color: rgba(255, 239, 160, 1);
+      border: 2px solid rgba(232, 205, 134, 1);
+      box-shadow: inset 1px 1px 100px rgba(0, 0, 0, 0.3);
+    }
+
+    .figura div {
+      margin: 0 auto;
+    }
+
+    .label {
+      font-family: arial, sans-serif;
+      font-size: 20px;
+      text-align: center;
+      padding-bottom: 35px;
+      font-weight: bold;
+    }
+
+    .diamante {
+      position: absolute;
+      border-style: solid;
+      /* border-color: transparent transparent rgb(0, 229, 255) transparent; */
+      border-color: transparent transparent var(--bordercoloraafter, rgb(0, 229, 255)) transparent;
+
+      border-width: 0 25px 25px 25px;
+      height: 0;
+      width: 50px;
+      position: relative;
+      margin: 20px 0 50px 0;
+    }
+
+    .diamante.nolabel {
+      margin-top: 50px;
+    }
+
+    .diamante:after {
+      content: "";
+      position: absolute;
+      top: 25px;
+      left: -25px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-color: var(--bordercoloraafter, rgb(0, 229, 255)) transparent transparent transparent;
+      /* border-color: rgb(0, 229, 255) transparent transparent transparent;*/
+      border-width: 70px 50px 0 50px;
+    }
+
+    .diamante.danio {
+      border-color: transparent transparent red transparent;
+    }
+
+    .diamante.danio:after {
+      border-color: red transparent transparent transparent;
+    }
+
+    .diamante.cien {
+      border-color: transparent transparent rgb(238, 160, 14) transparent;
+    }
+
+    .diamante.cien:after {
+      border-color: rgb(238, 160, 14) transparent transparent transparent;
+    }
+
+
+    .parpadeo {
+      animation: blink 0.5s infinite;
+      /* velocidad y repetición */
+    }
+
+    #texto {
+      color: red;
+      margin-top: -15px !important;
+    }
+
+    #texto.activo {
+      color: transparent;
+    }
+
+    @keyframes blink {
+      0% {
+        background-color: red;
+      }
+
+      50% {
+        background-color: yellow;
+      }
+
+      100% {
+        background-color: red;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="pantalla">
+    <div id="contador">5555</div>
+    <div id="contadorExperiencia">3</div>
+    <div id="vidas">3</div>
+    <div id="zonacliker">
+      <div class="figura">
+        <div id="mensajes" class="label hide-me">
+          <p id="texto" class="">Este texto parpadea</p>
+        </div>
+        <div id="enemigo" class="nolabel"></div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  class Enemigo {
+    vida;
+    classEnemigo;
+    constructor(incVidas = 3) {
+      this.vida = incVidas;
+      this.classEnemigo = "diamante";
+    }
+  }
+
+  class Jugador {
+    //clicks = 0;
+    subidaNivel = 1;
+    subidaNivelInicial = 1;
+    poderInicial = 1;
+    vidasInicial = 1;
+    poder;
+    vidas;
+    constructor() {
+      this.poder = 1;
+      this.vidas = 1;
+      this.subidaNivel = 1;
+    }
+    init(subidaNivelInicial) {
+      this.poder = this.poderInicial;
+      this.vidas = this.vidasInicial;
+      this.subidaNivel = subidaNivelInicial;
+    }
+    subirDeNivel(newSubidaNivel) {
+      this.poder = this.poder + 1;
+      this.subidaNivel = newSubidaNivel;
+    }
+    getPoder() {
+      return this.poder;
+    }
+    setPoder(aumento = 1) {
+      this.poder = this.poder + aumento;
+    }
+    getVidas() {
+      return this.vidas;
+    }
+    setVidas(aumento) {
+      this.vidas = this.vidas + aumento;
+    }
+    getSubidaNivel() {
+      return this.subidaNivel;
+    }
+    setSubidaNivel(aumento) {
+      this.subidaNivel = this.subidaNivel + aumento;
+    }
+  }
+
+  class Juego {
+    clicks;
+    clicksNecesariosParaGanarInicial;
+    clicksNecesariosParaGanar;
+    clicksNecesariosParaSubirNivelBase;
+    nivelesClicks;
+    instanciaJugador;
+    instanciaEnemigo;
+    arrayColoresEnemigos = ['rgb(0, 229, 255)', 'rgb(55, 50, 200)', 'rgb(200, 50, 200)', 'rgb(200, 50, 100)', 'rgb(238, 160, 14)'];
+    nivelActual;
+    constructor(clicksBase = 10, nivelesClicks = 1) {// TODO EN el futuro podría ser invocada desde fuera
+      this.instanciaJugador = new Jugador();
+      this.instanciaEnemigo = new Enemigo();
+      //this.clicks = 0;
+      this.clicksNecesariosParaGanarInicial = clicksBase * nivelesClicks;
+      this.clicksNecesariosParaGanar = this.clicksNecesariosParaGanarInicial;
+      this.nivelesClicks = nivelesClicks;
+      // (this.clicksNecesariosParaGanar * 0.25) es loq ue queramos que aumente de base
+      this.clicksNecesariosParaSubirNivelBase = (clicksBase * 0.25);
+      //this.clicksNecesariosASubirNivelInicial = clicksNecesariosSubirNivelInc;
+      this.init();
+    }
+
+    init() {
+      this.setClicks(0);
+      this.setNivelActual(1);
+      this.setIndiceColor(0);
+      this.clicksNecesariosParaGanar = this.clicksNecesariosParaGanarInicial;
+      this.instanciaJugador.init(this.clicksNecesariosParaSubirNivelBase);
+      //this.setColorEnemigoSegunNivel();
+      this.setColorByindice();
+      document.getElementById("contador").innerText = this.clicks;
+      document.getElementById("contadorExperiencia").innerText = this.instanciaJugador.getSubidaNivel();
+
+      //this.clicksNecesariosASubirNivel = this.clicksNecesariosASubirNivelInicial;
+
+      document.getElementById("vidas").innerText = this.instanciaJugador.getVidas();
+      document.getElementById("vidas").classList.add("hide-me");
+      document.getElementById("mensajes").classList.add("hide-me");
+      document.getElementById("enemigo").classList.add("nolabel");
+      document.getElementById("enemigo").classList.add(this.instanciaEnemigo.classEnemigo);
+
+
+      //remove("hide-me")
+      console.log("Juego iniciado");
+      return;
+    }
+    getNivelActual() {
+      return this.nivelActual;
+    }
+    setNivelActual(newValue) {
+      return this.nivelActual = newValue;
+    }
+    getIndiceColor() {
+      return this.indiceColor;
+    }
+    setIndiceColor(newValue) {
+      return this.indiceColor = newValue;
+    }
+    getClicks() {
+      return this.clicks;
+    }
+    setClicks(newValue) {
+      return this.clicks = newValue;
+    }
+    getClicksNecesariosASubirNivel() {
+      return this.clicksNecesariosASubirNivel;
+    }
+    setClicksNecesariosASubirNivel(nuevoValor) {
+      this.clicksNecesariosASubirNivel = nuevoValor;
+    }
+    subirDeNivel() {
+      const newSubidadeNivel = this.clicksNecesariosParaSubirNivelBase * this.instanciaJugador.getPoder();
+      this.instanciaJugador.subirDeNivel(newSubidadeNivel);
+      document.getElementById("contadorExperiencia").innerText = this.instanciaJugador.getSubidaNivel();
+      this.mostrarMensaje("¡Nivel Up! Poder: " + partida.instanciaJugador.getPoder(), 'green');
+      // TODO a partir de X nivel, subir también vidar...no olvida mostrar vidas entonces. 
+
+      //this.setColorEnemigoSegunNivel();
+      this.setColorByindice()
+
+
+    }
+    mostrarMensaje(mensajeIncoming = "Hola", colorTexto = "red") {
+      document.getElementById("mensajes").classList.remove("hide-me");
+      document.getElementById("enemigo").classList.remove("nolabel");
+      document.getElementById("texto").classList.add("activo");
+      document.getElementById("texto").innerHTML = mensajeIncoming;
+      // Guarrada, esto se´ria mejor con clases
+      document.getElementById("texto").style.color = colorTexto;
+      let parpadeo = setInterval(() => {
+        document.getElementById("texto").classList.toggle("activo");
+      }, 300);
+      setTimeout(() => {//Por si el jugador no clicka, quitamos nosotros la clase
+        document.getElementById("mensajes").classList.add("hide-me");
+        document.getElementById("enemigo").classList.add("nolabel");
+        //document.getElementById("mensajes").innerHTML = "";
+      }, 2000);
+
+      setTimeout(() => {
+        clearInterval(parpadeo);
+      }, 1000);
+    }
+    contarClick() {
+      this.clicks = this.clicks + this.instanciaJugador.getPoder();
+      document.getElementById("contador").innerText = this.clicks;
+      //document.getElementById("contadorExperiencia").innerText =  this.clicksNecesariosASubirNivel;
+      document.getElementById("enemigo").classList.toggle("danio");
+      setTimeout(() => {//Por si el jugador no clicka, quitamos nosotros la clase
+        document.getElementById("enemigo").classList.remove("danio");
+      }, 1);
+
+      // Comprobamos si sube de nivel y/o gana
+      if (this.getClicks() >= this.clicksNecesariosParaGanar) {
+        this.init();
+        // aEl init está mal, hay que refactorizar para que vuelva a empazae con loos valores el construct
+        setTimeout(() => {
+          this.mostrarMensaje("¡Has ganado! Reiniciando..."); 
+        }, 1000);
+        return;
+      }
+      if (this.getClicks() >= this.instanciaJugador.getSubidaNivel()) {
+        //console.log('Sube de nivel', this.clicksNecesariosASubirNivel, this.instanciaJugador.getPoder())
+        this.subirDeNivel();
+      }
+
+    }
+    setColorByindice() {
+      const nuevoColor = this.arrayColoresEnemigos[this.getIndiceColor()];
+      this.cambiarColorEnemigo(nuevoColor);
+      let newIndice = this.getIndiceColor() + 1;
+      if (newIndice >= this.arrayColoresEnemigos.length) {
+        newIndice = 0;
+      }
+      this.setIndiceColor(newIndice);
+    }
+    // Esto tiene fin, podríamos reiniciar los colores 
+    // Creando una vaariable 'currentColor' o mierdas así.
+    setColorEnemigoSegunNivel() {
+      let nivelActual = this.instanciaJugador.getPoder();
+      let colorASetear = 'rgb(0, 229, 255)'; // por defecto
+      if (nivelActual >= 2) {
+        colorASetear = this.arrayColoresEnemigos[4];
+      } else if (nivelActual >= 5) {
+        colorASetear = this.arrayColoresEnemigos[3];
+      } else if (nivelActual >= 7) {
+        colorASetear = this.arrayColoresEnemigos[2];
+      } else if (nivelActual >= 5) {
+        colorASetear = this.arrayColoresEnemigos[1];
+      }
+      this.cambiarColorEnemigo(colorASetear);
+    }
+    // Esto debería estar en un helkper o algo..
+    cambiarColorEnemigo(nuevoColor) {
+      document.getElementById("enemigo").style.setProperty('--bordercoloraafter', nuevoColor)
+    }
+
+    
+  }
+
+  const partida = new Juego(10, 1);
+
+  document.getElementById("enemigo").addEventListener('click', () => {
+    partida.contarClick();
+  });
+</script>
+
+</html>
