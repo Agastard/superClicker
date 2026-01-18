@@ -9,7 +9,8 @@
     body {
       display: grid;
       place-items: center;
-      height: 50vh;
+      height: 450px;
+      /* antes 50vh */
       background: rgb(206, 204, 204);
       padding-top: 5px;
     }
@@ -20,8 +21,10 @@
 
     #pantalla {
       position: relative;
-      width: 20vh;
-      height: 22vh;
+      width: 265px;
+      /* antes 20vh */
+      height: 298px;
+      /* antes 22vh */
       border: 2px solid black;
       background-color: lightblue;
     }
@@ -102,10 +105,6 @@
       margin: 20px 0 50px 0;
     }
 
-    .diamante.nolabel {
-      margin-top: 50px;
-    }
-
     .diamante:after {
       content: "";
       position: absolute;
@@ -119,20 +118,132 @@
       border-width: 70px 50px 0 50px;
     }
 
+    .estrella {
+      position: relative;
+      display: block;
+      width: 0;
+      height: 0;
+      margin: 50px;
+      border-right: 50px solid transparent;
+      border-bottom: 35px solid gold;
+      border-left: 50px solid transparent;
+      transform: rotate(35deg);
+    }
+
+    .estrella::before {
+      content: "";
+      position: absolute;
+      border-bottom: 40px solid gold;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      top: -22px;
+      left: -32px;
+      transform: rotate(-35deg);
+    }
+
+    .estrella::after {
+      content: "";
+      position: absolute;
+      border-right: 50px solid transparent;
+      border-bottom: 35px solid gold;
+      border-left: 50px solid transparent;
+      top: 3px;
+      left: -52px;
+      transform: rotate(-70deg);
+    }
+
+    .escudo {
+      position: relative;
+      width: 80px;
+      height: 100px;
+      background: #3fa9f5;
+      border-radius: 12px 12px 40px 40px;
+      clip-path: polygon(0% 0%,
+          100% 0%,
+          100% 65%,
+          50% 100%,
+          0% 65%);
+      box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+
+    .escudo.danio {
+      background: crimson;
+    }
+
+
+    #enemigo.nolabel {
+      margin-top: 50px;
+    }
+
+    .estrella.danio {
+      border-bottom-color: crimson;
+    }
+
+    .estrella.danio::before {
+      border-bottom-color: crimson;
+    }
+
+    .estrella.danio::after {
+      border-bottom-color: crimson;
+    }
+
     .diamante.danio {
-      border-color: transparent transparent red transparent;
+      border-color: transparent transparent crimson transparent !important;
     }
 
     .diamante.danio:after {
-      border-color: red transparent transparent transparent;
+      border-color: crimson transparent transparent transparent !important;
     }
 
-    .diamante.cien {
-      border-color: transparent transparent rgb(238, 160, 14) transparent;
+    /* Alien */
+    .ovni {
+      --color-base: #9ad9db;
+      --color-cabina: rgba(255, 255, 255, 0.6);
+      --color-luz: #00ffcc;
+
+      position: relative;
+      width: 120px;
+      height: 40px;
+      background: var(--color-base);
+      border-radius: 50% / 60%;
+      box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.15);
     }
 
-    .diamante.cien:after {
-      border-color: rgb(238, 160, 14) transparent transparent transparent;
+    /* Cabina superior */
+    .ovni::before {
+      content: "";
+      position: absolute;
+      top: -18px;
+      left: 30px;
+      width: 60px;
+      height: 30px;
+      background: var(--color-cabina);
+      border-radius: 50%;
+      box-shadow: inset 0 -4px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    /* Luces inferiores */
+    .ovni::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 15px;
+      width: 90px;
+      height: 12px;
+      background:
+        radial-gradient(circle, var(--color-luz) 40%, transparent 41%) 0 0 / 18px 12px;
+    }
+
+    .ovni {
+      --color-item: #9ad9db;
+    }
+
+    .ovni.danio {
+      --color-item: crimson;
+    }
+
+    .ovni {
+      background: var(--color-item);
     }
 
 
@@ -186,9 +297,32 @@
   class Enemigo {
     vida;
     classEnemigo;
-    constructor(incVidas = 3) {
+    enemigoEl;
+    arrayEnemigos;
+    constructor(incVidas = 3, incEnemigo = "enemigo") {
       this.vida = incVidas;
-      this.classEnemigo = "diamante";
+      this.arrayEnemigos = ['diamante', 'estrella', 'escudo', 'ovni'];
+      this.enemigoEl = document.getElementById(incEnemigo);
+      this.classEnemigo = null;
+      this.init();
+    }
+    init() {
+      this.quitaEnemigo()
+      this.setRandomEnemigo();
+    }
+    setRandomEnemigo() {
+      const indiceAleatorio = Math.floor(Math.random() * this.arrayEnemigos.length);
+      this.setEnemigoByIndice(indiceAleatorio);
+    }
+    setEnemigoByIndice(indice) {
+      this.setEnemigoClase(this.arrayEnemigos[indice]);
+    }
+    quitaEnemigo() {
+      this.enemigoEl.className = "nolabel";
+    }
+    setEnemigoClase(nuevaClase) {
+      this.classEnemigo = nuevaClase;
+      this.enemigoEl.classList.add(nuevaClase);
     }
   }
 
@@ -275,7 +409,7 @@
       document.getElementById("contadorExperiencia").innerText = this.instanciaJugador.getSubidaNivel();
       this.mostrarMensaje("¡Nivel Up! Poder: " + this.instanciaJugador.getPoder(), 'green');
       // TODO a partir de X nivel, subir también vidar...no olvida mostrar vidas entonces. 
-      this.setColorByindice()
+      this.setColorByindice();
     }
     mostrarMensaje(mensajeIncoming = "Hola", colorTexto = "red") {
       document.getElementById("mensajes").classList.remove("hide-me");
@@ -307,7 +441,8 @@
 
       // Comprobamos si sube de nivel y/o gana
       if (this.getClicks() >= this.clicksNecesariosParaGanar) {
-        this.mostrarMensaje("¡Has ganado! Reiniciando..."); 
+        this.mostrarMensaje("¡Has ganado! Reiniciando...");
+        this.instanciaEnemigo.quitaEnemigo();
         setTimeout(() => {
           this.init();
         }, 1000);
@@ -356,18 +491,14 @@
       document.getElementById("vidas").classList.add("hide-me");
       document.getElementById("mensajes").classList.add("hide-me");
 
-      const enemigo = document.getElementById("enemigo");
-      enemigo.classList.add("nolabel");
-      //enemigo.className = ""; // limpia clases anteriores
-      enemigo.classList.remove("diamante");
-      enemigo.classList.add(this.instanciaEnemigo.classEnemigo);
+      this.instanciaEnemigo.init();
 
       this.setColorByindice();
     }
 
   }
 
-  const partida = new Juego(20,1);
+  const partida = new Juego(20, 1);
 
   document.getElementById("enemigo").addEventListener('click', () => {
     partida.contarClick();
