@@ -238,6 +238,22 @@
       --color-item: #9ad9db;
     }
 
+    .ovni {
+      animation: flotar 2s ease-in-out infinite;
+    }
+
+    @keyframes flotar {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
     .ovni.danio {
       --color-item: crimson;
     }
@@ -277,7 +293,8 @@
     }
 
     #pantalla.tiendaabrierta {
-      height: 30vh;
+        height: 298px;
+       /* height: 30vh;/ */
       /* el doble de su base. */
     }
 
@@ -387,12 +404,12 @@
 
 <script>
   class Enemigo {
-    vida;
+    vidas;
     classEnemigo;
     enemigoEl;
     arrayEnemigos;
     constructor(incVidas = 3, incEnemigo = "enemigo") {
-      this.vida = incVidas;
+      this.vidas = incVidas;
       this.arrayEnemigos = ['diamante', 'estrella', 'escudo', 'ovni'];
       this.enemigoEl = document.getElementById(incEnemigo);
       this.classEnemigo = null;
@@ -401,6 +418,9 @@
     init() {
       this.quitaEnemigo()
       this.setRandomEnemigo();
+    }
+    quitarVida() {
+      this.vidas = this.vidas - 1;
     }
     setRandomEnemigo() {
       const indiceAleatorio = Math.floor(Math.random() * this.arrayEnemigos.length);
@@ -466,6 +486,8 @@
     instanciaJugador;
     instanciaEnemigo;
     arrayColoresEnemigos = ['rgb(0, 229, 255)', 'rgb(55, 50, 200)', 'rgb(200, 50, 200)', 'rgb(200, 50, 100)', 'rgb(238, 160, 14)'];
+    enemigosADerrotar = 0;
+    enemigosADerrotarInicial = 0;
     constructor(clicksBase = 10, nivelesClicks = 1) {// TODO EN el futuro podría ser invocada desde fuera
       this.instanciaJugador = new Jugador();
       this.instanciaEnemigo = new Enemigo();
@@ -533,7 +555,7 @@
       }, 1);
 
       // Comprobamos si sube de nivel y/o gana
-      if (this.getClicks() >= this.clicksNecesariosParaGanar) {
+      if (this.checkGanar()) {
         this.mostrarMensaje("¡Has ganado! Reiniciando...");
         this.instanciaEnemigo.quitaEnemigo();
         setTimeout(() => {
@@ -541,10 +563,32 @@
         }, 1000);
         return;
       }
+      /* Dañar enemigo */
+      if( this.checkDaniarEnemigo() ) {
+        this.instanciaEnemigo.quitarVida();
+        this.mostrarMensaje("¡Enemigo dañado!", 'red');
+      }
+      if( this.getClicks() >= this.clicksNecesariosParaGanar * 0.75) {
+        this.mostrarMensaje("¡Casi lo tienes!", 'yellow');
+      }
       if (this.getClicks() >= this.instanciaJugador.getSubidaNivel()) {
         this.subirDeNivel();
       }
 
+    }
+    checkGanar() {
+      if (this.clicks >= this.clicksNecesariosParaGanar) {
+        return true;
+      }
+      return false;
+    }
+    checkDaniarEnemigo() {
+      const danioNecesario = this.clicksNecesariosParaGanar / this.instanciaEnemigo.vidas;
+      
+      if (this.clicks >= danioNecesario || this.instanciaEnemigo.vidas <= 0) {
+        return true;
+      }
+      return false;
     }
     setColorByindice() {
       const nuevoColor = this.arrayColoresEnemigos[this.getIndiceColor()];
@@ -569,6 +613,8 @@
 
       // Valores derivados
       this.clicksNecesariosParaGanar = this.clicksNecesariosParaGanarInicial;
+      this.enemigosADerrotar = this.instanciaEnemigo.arrayEnemigos.length;
+      this.enemigosADerrotarInicial = this.instanciaEnemigo.arrayEnemigos.length;
 
       // Inicializar subida de nivel correctamente
       this.instanciaJugador.init(this.clicksNecesariosParaSubirNivelBase);
@@ -612,7 +658,7 @@
     }
   }
 
-  const partida = new Juego(20, 4);
+  const partida = new Juego(30, 4);
 
   document.getElementById("enemigo").addEventListener('click', () => {
     partida.contarClick();
