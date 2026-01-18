@@ -566,6 +566,8 @@
       /* Dañar enemigo */
       if( this.checkDaniarEnemigo() ) {
         this.instanciaEnemigo.quitarVida();
+        this.instanciaEnemigo.quitaEnemigo()
+        this.instanciaEnemigo.setRandomEnemigo();
         this.mostrarMensaje("¡Enemigo dañado!", 'red');
       }
       if( this.getClicks() >= this.clicksNecesariosParaGanar * 0.75) {
