@@ -579,7 +579,7 @@
       if( this.getClicks() >= this.clicksNecesariosParaGanar * 0.75) {
         this.mostrarMensaje("¡Casi lo tienes!", 'yellow');
       }
-      if (this.getClicks() >= this.instanciaJugador.getSubidaNivel()) {
+      if (this.getClicks() >= parseInt(this.instanciaJugador.getSubidaNivel(), 10)) {
         this.subirDeNivel();
       }
 
