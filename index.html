@@ -526,7 +526,8 @@
       const newSubidadeNivel = this.clicksNecesariosParaSubirNivelBase * nextPoder;
       //const newSubidadeNivel = this.clicksNecesariosParaSubirNivelBase * this.instanciaJugador.getPoder();
       this.instanciaJugador.subirDeNivel(newSubidadeNivel);
-      document.getElementById("contadorExperiencia").innerText = this.instanciaJugador.getSubidaNivel();
+      document.getElementById("contadorExperiencia").innerText = 
+      parseInt(this.instanciaJugador.getSubidaNivel(), 10 );
       this.mostrarMensaje("¡Nivel Up! Poder: " + this.instanciaJugador.getPoder(), 'green');
       // TODO a partir de X nivel, subir también vidar...no olvida mostrar vidas entonces. 
       this.setColorByindice();
@@ -629,10 +630,10 @@
     renderUI() {
       document.getElementById("contador").innerText = this.clicks;
       document.getElementById("contadorExperiencia").innerText =
-        this.instanciaJugador.getSubidaNivel();
+        parseInt(this.instanciaJugador.getSubidaNivel(), 10);
 
       document.getElementById("vidas").innerText =
-        this.instanciaJugador.getVidas();
+        parseInt(this.instanciaJugador.getVidas(), 10);
 
       document.getElementById("vidas").classList.add("hide-me");
       document.getElementById("mensajes").classList.add("hide-me");
